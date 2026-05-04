@@ -1,0 +1,357 @@
+:root {
+  --text: #1a1a2e;
+  --text-light: #6b7280;
+  --bg: #f8f9fa;
+  --cell-bg: #ffffff;
+  --cell-given: #1a1a2e;
+  --cell-user: #4f46e5;
+  --cell-conflict: #ef4444;
+  --cell-selected: #e0e7ff;
+  --cell-highlight: #f3f4f6;
+  --border: #d1d5db;
+  --border-strong: #374151;
+  --accent: #4f46e5;
+  --pencil: #9ca3af;
+  --cell-hint: #fef3c7;
+  --cell-hint-border: #fbbf24;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #f3f4f6;
+    --text-light: #9ca3af;
+    --bg: #111827;
+    --cell-bg: #1f2937;
+    --cell-given: #f3f4f6;
+    --cell-user: #818cf8;
+    --cell-conflict: #f87171;
+    --cell-selected: #312e81;
+    --cell-highlight: #1f2937;
+    --border: #374151;
+    --border-strong: #9ca3af;
+    --accent: #818cf8;
+    --pencil: #6b7280;
+    --cell-hint: #78350f;
+    --cell-hint-border: #fbbf24;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.sudoku-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 540px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.difficulty-select {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.difficulty-select button {
+  padding: 8px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--cell-bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.difficulty-select button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.difficulty-select button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.action-buttons button {
+  padding: 8px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--cell-bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.action-buttons button:hover {
+  background: var(--cell-highlight);
+}
+
+.action-buttons .check-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.action-buttons .check-btn:hover {
+  opacity: 0.9;
+}
+
+/* Board */
+.board-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  outline: none;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  border: 2px solid var(--border-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--border);
+  gap: 1px;
+  width: min(100%, 500px);
+  aspect-ratio: 1;
+}
+
+.cell {
+  background: var(--cell-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.1s;
+  user-select: none;
+  aspect-ratio: 1;
+}
+
+/* 3x3 box borders */
+.cell:nth-child(3n) { border-right: 2px solid var(--border-strong); }
+.cell:nth-child(9n) { border-right: none; }
+
+/* row bottom borders every 3 rows */
+.cell:nth-child(n+19):nth-child(-n+27),
+.cell:nth-child(n+46):nth-child(-n+54) {
+  border-bottom: 2px solid var(--border-strong);
+}
+
+.cell.selected {
+  background: var(--cell-selected);
+}
+
+.cell.highlight {
+  background: var(--cell-highlight);
+}
+
+.cell.conflict .num {
+  color: var(--cell-conflict) !important;
+}
+
+.cell.given {
+  font-weight: 700;
+}
+
+.cell.hint {
+  background: var(--cell-hint);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: inset 0 0 0 2px var(--cell-hint-border); }
+  50% { box-shadow: inset 0 0 0 3px var(--cell-hint-border), 0 0 10px var(--cell-hint-border); }
+}
+
+.num {
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: 600;
+  color: var(--cell-given);
+  line-height: 1;
+}
+
+.cell:not(.given) .num {
+  color: var(--cell-user);
+}
+
+/* Pencil marks */
+.pencil-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  gap: 0;
+}
+
+.pen {
+  font-size: clamp(0.4rem, 1.5vw, 0.7rem);
+  color: var(--pencil);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.pen.empty {
+  visibility: hidden;
+}
+
+/* Mode toggle */
+.mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mode-toggle button {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--cell-bg);
+  color: var(--text-light);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mode-toggle button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.stat {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Undo button */
+.action-buttons .undo-btn {
+  color: var(--text-light);
+}
+
+.action-buttons .undo-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal {
+  background: var(--cell-bg);
+  border-radius: 16px;
+  padding: 40px 48px;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-icon {
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.modal h2 {
+  margin: 0 0 12px;
+  font-size: 1.75rem;
+}
+
+.modal p {
+  margin: 0 0 28px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+.modal button {
+  padding: 12px 32px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.modal button:hover {
+  opacity: 0.9;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
